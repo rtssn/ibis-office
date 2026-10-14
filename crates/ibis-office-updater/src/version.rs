@@ -2,10 +2,10 @@
 // Copyright (c) ibis inc.
 // Additional terms under AGPL-3.0 section 7(b): see NOTICE.
 //! version.txt: a platform, a tab and its version per line (`macOS<TAB>0.8.0`,
-//! `Windows<TAB>0.8.0`, `wasm<TAB>0.8.0`), and comparing versions.
+//! `Windows<TAB>0.8.0`, `Linux<TAB>0.8.0`, `wasm<TAB>0.8.0`), and comparing versions.
 
 /// This platform's name in version.txt and in the zip's file name.
-pub const PLATFORM: &str = if cfg!(target_os = "windows") { "Windows" } else { "macOS" };
+pub const PLATFORM: &str = if cfg!(target_os = "windows") { "Windows" } else if cfg!(target_os = "linux") { "Linux" } else { "macOS" };
 
 /// `platform`'s version in the text of version.txt.
 pub fn find(text: &str, platform: &str) -> Option<String> {

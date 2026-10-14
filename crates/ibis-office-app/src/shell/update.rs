@@ -203,13 +203,16 @@ fn clear_attempts_if_updated() {
 
 // ---- Where this copy is installed --------------------------------------
 
-/// The installed copy to replace: the `.app` (macOS) or the folder of `ibisOffice.exe` (Windows), or why it cannot be.
+/// The installed copy to replace: the `.app` (macOS) or the folder of `ibisOffice.exe` (Windows), or why it cannot be (Linux has none: a Linux build is distributed as a tar.gz and replaced by hand).
 fn installed_copy() -> Result<PathBuf, String> {
     let exe = std::env::current_exe().map_err(|e| format!("current_exe: {e}"))?;
     let exe = exe.canonicalize().unwrap_or(exe);
     let text = exe.to_string_lossy().replace('\\', "/");
     if text.contains("/target/release/") || text.contains("/target/debug/") || text.contains("/target/dist/") {
         return Err("a build run from the source tree".into());
+    }
+    if cfg!(target_os = "linux") {
+        return Err("Linux builds are updated by hand (download the new tar.gz)".into());
     }
     #[cfg(target_os = "macos")]
     let app = {
@@ -558,6 +561,6 @@ mod tests {
     #[test]
     fn the_zip_is_named_for_the_version_and_platform() {
         let name = zip_name("0.9.0");
-        assert!(name == "ibisOffice-0.9.0-macOS.zip" || name == "ibisOffice-0.9.0-Windows.zip");
+        assert!(["macOS", "Windows", "Linux"].iter().any(|platform| name == format!("ibisOffice-0.9.0-{platform}.zip")));
     }
 }

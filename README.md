@@ -139,9 +139,12 @@ cd ibis-office
 cargo build --release
 ```
 
+- On Linux, install the development packages first. On Debian and Ubuntu: `sudo apt install build-essential pkg-config libfontconfig-dev libfreetype-dev libxcb1-dev libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-xcb-dev libasound2-dev`. It runs on Wayland and X11 and needs a Vulkan driver.
 - Requires the latest stable Rust.
 - On macOS, `scripts/bundle-macos.sh` builds the app at `target/release/ibisOffice.app`.
+- On Linux, `scripts/bundle-linux.sh` builds `target/release/ibisOffice-<version>-Linux.tar.gz`. Unpack it anywhere and run `./ibisOffice`; `ibisOffice.desktop` is the desktop entry. There is no automatic update on Linux: when a newer version exists the app tells you, and you replace the folder by hand.
 - For the browser edition, build with `scripts/build-web.sh --release` and serve `www/` (browsers with WebGPU: Chrome, Edge, Safari 26 or later).
+- On Linux, the export to PNG, PDF and GIF (`--export` and File > Export) is not available yet, because GPUI has no headless renderer for Linux.
 
 ## Implemented Features
 

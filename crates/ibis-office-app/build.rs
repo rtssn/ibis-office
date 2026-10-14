@@ -54,7 +54,7 @@ fn main() {
 
 /// The version the app shows (`IBIS_VERSION`), the one version.txt (at the
 /// top of the repository: a platform, a tab and its version, per line) gives
-/// the platform built for: Windows, macOS or wasm.
+/// the platform built for: Windows, macOS, Linux or wasm.
 fn app_version() {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../version.txt");
     println!("cargo:rerun-if-changed={}", path.display());
@@ -63,6 +63,7 @@ fn app_version() {
     let platform = match (target("CARGO_CFG_TARGET_OS").as_str(), target("CARGO_CFG_TARGET_FAMILY").as_str()) {
         ("windows", _) => "Windows",
         ("macos", _) => "macOS",
+        ("linux", _) => "Linux",
         (_, "wasm") => "wasm",
         (os, _) => panic!("version.txt has no line for {os}"),
     };

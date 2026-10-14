@@ -139,9 +139,12 @@ cd ibis-office
 cargo build --release
 ```
 
+- Linux では、先に開発用パッケージを入れてください。Debian・Ubuntu の場合：`sudo apt install build-essential pkg-config libfontconfig-dev libfreetype-dev libxcb1-dev libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-xcb-dev libasound2-dev`。Wayland と X11 のどちらでも動き、Vulkan のドライバーが必要です。
 - Rust の最新の stable が要ります。
 - macOS のアプリは `scripts/bundle-macos.sh` で、`target/release/ibisOffice.app` に作られます。
+- Linux のアプリは `scripts/bundle-linux.sh` で、`target/release/ibisOffice-<版>-Linux.tar.gz` に作られます。展開した場所で `./ibisOffice` を起動してください（`ibisOffice.desktop` はデスクトップエントリです）。Linux には自動更新がありません。新しい版があるとアプリが知らせるので、フォルダを手で置き換えてください。
 - ブラウザ版は `scripts/build-web.sh --release` でビルドし、`www/` を配信します（WebGPU に対応したブラウザ：Chrome・Edge・Safari 26 以降）。
+- Linux では、PNG・PDF・GIF への書き出し（`--export` とファイル > 書き出し）はまだ使えません。GPUI に Linux 用のヘッドレス描画がないためです。
 
 ## 実装済み
 
