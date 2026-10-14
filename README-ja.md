@@ -144,7 +144,7 @@ cargo build --release
 - macOS のアプリは `scripts/bundle-macos.sh` で、`target/release/ibisOffice.app` に作られます。
 - Linux のアプリは `scripts/bundle-linux.sh` で、`target/release/ibisOffice-<版>-Linux.tar.gz` に作られます。展開した場所で `./ibisOffice` を起動してください（`ibisOffice.desktop` はデスクトップエントリです）。Linux には自動更新がありません。新しい版があるとアプリが知らせるので、フォルダを手で置き換えてください。
 - ブラウザ版は `scripts/build-web.sh --release` でビルドし、`www/` を配信します（WebGPU に対応したブラウザ：Chrome・Edge・Safari 26 以降）。
-- Linux では、PNG・PDF・GIF への書き出し（`--export` とファイル > 書き出し）はまだ使えません。GPUI に Linux 用のヘッドレス描画がないためです。
+- Linux では、PDF・PNG・GIF への書き出し（`--export` とファイル > 書き出し）は、ウィンドウなしで GPU を使って描きます。Vulkan のドライバーが必要です（Mesa の lavapipe のようなソフトウェア実装でも動きます）。画面（ディスプレイ）は要りません。
 
 ## 実装済み
 
@@ -1571,7 +1571,7 @@ ibisOffice は、**AGPL-3.0-only と商用ライセンスのデュアルライ�
 
 ibisOffice の著作権は、すべて株式会社アイビスが持っています。そのため、両方のライセンスで提供できます。
 
-使っている部品と、それぞれのライセンスが求める表示は [www/license.md](www/license.md) にあります。GPUI（Apache-2.0）は、改変したフォークを [gpui-pre](https://github.com/ibisjp/gpui-pre)・[gpui-pre-macos](https://github.com/ibisjp/gpui-pre-macos)・[gpui-pre-web](https://github.com/ibisjp/gpui-pre-web) で公開しています。
+使っている部品と、それぞれのライセンスが求める表示は [www/license.md](www/license.md) にあります。GPUI（Apache-2.0）は、改変したフォークを [gpui-pre](https://github.com/ibisjp/gpui-pre)・[gpui-pre-macos](https://github.com/ibisjp/gpui-pre-macos)・[gpui-pre-web](https://github.com/ibisjp/gpui-pre-web) で公開しています。 Linux 用には、ウィンドウなしで描くレンダラーを足した gpui-pre-wgpu（Apache-2.0）のコピーを `forks/gpui-pre-wgpu` に含めています。
 
 ## 貢献について
 

@@ -29,7 +29,7 @@ harfrust = "=0.5.2"
 
 # For the `export` feature: GPUI's headless renderer is part of its test
 # support, which also turns on GPUI's entity leak tracking (a small cost).
-[target.'cfg(any(target_os = "macos", windows))'.dependencies]
+[target.'cfg(any(target_os = "macos", target_os = "linux", windows))'.dependencies]
 gpui-pre-platform = { version = "=0.3.6", features = ["test-support"], optional = true }
 miniz_oxide = { version = "0.8", optional = true }
 # Vector PDF export: pages as text, paths and images (MIT OR Apache-2.0).
@@ -65,6 +65,11 @@ core-foundation = "0.10.1"
 core-text = "21"
 core-graphics = "0.24"
 
+# Linux only.
+[target.'cfg(target_os = "linux")'.dependencies]
+# The headless renderer of ibisOffice's vendored gpui-pre-wgpu (forks/gpui-pre-wgpu): the export draws without a window (GPUI has none for Linux).
+gpui-pre-wgpu = { version = "=0.3.6", features = ["headless"], optional = true }
+
 # For the `export` feature on Windows: the headless DirectX renderer of
 # ibisOffice's fork of the Windows platform (GPUI has none for Windows).
 [target.'cfg(windows)'.dependencies]
@@ -75,9 +80,9 @@ default = ["export"]
 # The scenario tests' driver (`src/shell/scenario.rs`), for tests/scenarios.rs;
 # turned on for this crate's own tests by the dev-dependency below.
 scenarios = ["export"]
-# `--export png|pdf|pdf-image|ui` on the command line (macOS and Windows;
+# `--export png|pdf|pdf-image|ui` on the command line (macOS, Windows and Linux;
 # build.rs sets `cfg(headless_export)` for it).
-export = ["dep:gpui-pre-platform", "dep:gpui-pre-windows", "dep:image", "dep:miniz_oxide", "dep:krilla", "dep:skrifa", "dep:subsetter", "dep:gpui-pre-macos"]
+export = ["dep:gpui-pre-platform", "dep:gpui-pre-windows", "dep:image", "dep:miniz_oxide", "dep:krilla", "dep:skrifa", "dep:subsetter", "dep:gpui-pre-macos", "dep:gpui-pre-wgpu"]
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 # Reading a fetched response's body (the art borders' pictures); the version

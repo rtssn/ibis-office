@@ -144,7 +144,7 @@ cargo build --release
 - On macOS, `scripts/bundle-macos.sh` builds the app at `target/release/ibisOffice.app`.
 - On Linux, `scripts/bundle-linux.sh` builds `target/release/ibisOffice-<version>-Linux.tar.gz`. Unpack it anywhere and run `./ibisOffice`; `ibisOffice.desktop` is the desktop entry. There is no automatic update on Linux: when a newer version exists the app tells you, and you replace the folder by hand.
 - For the browser edition, build with `scripts/build-web.sh --release` and serve `www/` (browsers with WebGPU: Chrome, Edge, Safari 26 or later).
-- On Linux, the export to PNG, PDF and GIF (`--export` and File > Export) is not available yet, because GPUI has no headless renderer for Linux.
+- On Linux, the export to PDF, PNG and GIF (`--export` and File > Export) draws on the GPU without a window, with a Vulkan driver (a software one such as Mesa lavapipe also works). No display is needed.
 
 ## Implemented Features
 
@@ -1571,7 +1571,7 @@ ibisOffice is **dual-licensed under AGPL-3.0-only and a commercial license**.
 
 All copyrights in ibisOffice are held by ibis inc., which is what allows it to be offered under both licenses.
 
-The components we use and the notices their licenses require are listed in [www/license.md](www/license.md). Our modified forks of GPUI (Apache-2.0) are published as [gpui-pre](https://github.com/ibisjp/gpui-pre), [gpui-pre-macos](https://github.com/ibisjp/gpui-pre-macos) and [gpui-pre-web](https://github.com/ibisjp/gpui-pre-web).
+The components we use and the notices their licenses require are listed in [www/license.md](www/license.md). Our modified forks of GPUI (Apache-2.0) are published as [gpui-pre](https://github.com/ibisjp/gpui-pre), [gpui-pre-macos](https://github.com/ibisjp/gpui-pre-macos) and [gpui-pre-web](https://github.com/ibisjp/gpui-pre-web). On Linux, a copy of gpui-pre-wgpu (Apache-2.0) with a headless renderer is included under `forks/gpui-pre-wgpu`.
 
 ## Contributing
 
