@@ -15,6 +15,7 @@ pub(crate) mod file_actions;
 pub(crate) mod chrome;
 pub(crate) mod color_palette;
 pub(crate) mod chrome_defaults;
+pub(crate) mod font_menu;
 pub(crate) mod format;
 pub(crate) mod i18n;
 pub(crate) mod settings;

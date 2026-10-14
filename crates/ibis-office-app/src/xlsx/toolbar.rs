@@ -848,7 +848,11 @@ pub(crate) fn toolbar_right(editor: &SlideEditor) -> Vec<ToolItem> {
     number_menu.push(MenuEntry::Separator);
     number_menu.push(MenuItem::tr("xlsx.number-format-custom").on(|this, window, cx| this.open_custom_format(window, cx)).into());
     let font = style.font.clone().unwrap_or_else(|| "游ゴシック".into()); // i18n-ok（既定のフォント名（スタイルに保存される値））
-    let font_menu: Vec<MenuEntry> = FONTS.iter().map(|&f| MenuItem::new("xlsx.font", f).checked(font == f).on(format(StyleChange::Font(Some(f.into())))).into()).collect();
+    let mut font_menu: Vec<MenuEntry> = FONTS.iter().map(|&f| MenuItem::new("xlsx.font", f).checked(font == f).on(format(StyleChange::Font(Some(f.into())))).into()).collect();
+    if let Some(installed) = crate::shell::font_menu::installed_fonts_entry(Some(&font), |this, family, _, cx| this.format_cells(StyleChange::Font(Some(family.into())), cx)) {
+        font_menu.push(MenuEntry::Separator);
+        font_menu.push(installed);
+    }
     let size = style.font_size;
     let halign = |id: &'static str, icon: &'static str, label: &'static str, a: CellAlign| -> MenuEntry { MenuItem::new(id, crate::shell::i18n::text(label)).icon(icon).checked(style.align == a).on(format(StyleChange::Align(a))).into() };
     let valign = |id: &'static str, icon: &'static str, label: &'static str, a: CellVerticalAlign| -> MenuEntry { MenuItem::new(id, crate::shell::i18n::text(label)).icon(icon).checked(style.vertical == a).on(format(StyleChange::Vertical(a))).into() };

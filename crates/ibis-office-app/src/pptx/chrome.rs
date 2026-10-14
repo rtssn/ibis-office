@@ -2179,6 +2179,15 @@ fn text_buttons(editor: &SlideEditor) -> Vec<ToolItem> {
                 .into()
         })
         .collect();
+    if let Some(installed) = crate::shell::font_menu::installed_fonts_entry(current_font, |this, family, window, cx| {
+        this.format_characters(window, cx, ibis_doc_model::CharacterFormat {
+            font: Some(Some(family.to_string())),
+            ..Default::default()
+        });
+    }) {
+        font_menu.push(MenuEntry::Separator);
+        font_menu.push(installed);
+    }
     font_menu.push(MenuEntry::Separator);
     font_menu.push(MenuItem::tr("pptx.replace-fonts").on(|this, window, cx| this.open_replace_fonts_panel(window, cx)).into());
     vec![

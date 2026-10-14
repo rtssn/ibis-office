@@ -472,7 +472,7 @@ pub(crate) fn menu_item_row(item: &MenuItem, editor: &WeakEntity<SlideEditor>) -
                 // Icon (or ✓) in the menu's icon column, the label, the shortcut.
                 // The code's words in the UI's language; a document's names (sheets,
                 // layouts, styles, fonts, files) as they are.
-                const NAMES: [&str; 8] = ["file.recent.item", "xlsx.unhide-sheet", "xlsx.validation-item", "pptx.new-slide.layout", "pptx.layout.apply", "docx.style.update", "xlsx.font", "xlsx.function"];
+                const NAMES: [&str; 9] = ["file.recent.item", "xlsx.unhide-sheet", "xlsx.validation-item", "pptx.new-slide.layout", "pptx.layout.apply", "docx.style.update", "xlsx.font", "xlsx.function", "font.installed"];
                 let label = if NAMES.contains(&item.id) { item.label.clone() } else if crate::shell::i18n::is_font_name(&item.label) { crate::shell::i18n::font_label(&item.label) } else { crate::shell::i18n::text(&item.label) };
                 let (shortcut, enabled) = (item.shortcut, item.enabled());
                 let has_icon = item.icon.is_some_and(|i| !i.is_empty()) && !item.checked;
@@ -532,7 +532,11 @@ pub(crate) fn fill_menu(mut menu: PopupMenu, entries: &[MenuEntry], editor: &Wea
             MenuEntry::Submenu(sub) => {
                 let (items, editor) = (sub.items.clone(), editor.clone());
                 let icon = sub.icon.map(menu_icon);
-                menu.submenu_with_icon(icon, crate::shell::i18n::text(&sub.label), window, cx, move |m, window, cx| fill_menu(m, &items, &editor, window, cx))
+                menu.submenu_with_icon(icon, crate::shell::i18n::text(&sub.label), window, cx, move |m, window, cx| {
+                    // A long submenu (all installed fonts) scrolls instead of running past the window.
+                    let m = if items.len() > 24 { m.max_h(px(420.)).scrollable(true) } else { m };
+                    fill_menu(m, &items, &editor, window, cx)
+                })
             }
             MenuEntry::Palette(palette) => crate::shell::color_palette::fill_palette(menu, palette, editor, cx),
             MenuEntry::Item(item) => menu.item(menu_item_row(item, editor)),

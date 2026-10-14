@@ -554,6 +554,30 @@ pub(crate) fn is_east_asian_typeface(name: &str) -> bool {
     name.chars().any(|c| c as u32 >= 0x2e80) || HINTS.iter().any(|h| name.contains(h))
 }
 
+/// The families of the installed fonts, for a font menu: sorted (case-insensitive, then as is), without the
+/// system's hidden ones (names starting with '.') or empty names, each once. Empty until the first document has
+/// been drawn (the list is made then).
+pub(crate) fn installed_font_families() -> Vec<String> {
+    let Some(names) = SYSTEM_FONTS.get() else { return Vec::new() };
+    let mut families: Vec<String> = names.iter().filter(|name| !name.is_empty() && !name.starts_with('.')).cloned().collect();
+    families.sort_by_key(|name| (name.to_lowercase(), name.clone()));
+    families
+}
+
+/// Whether `family` has the glyph of the hiragana あ: a font for Japanese text, whatever its name.
+pub(crate) fn covers_japanese(cx: &App, family: &str) -> bool {
+    let text_system = cx.text_system();
+    let font = Font {
+        family: family.to_string().into(),
+        features: FontFeatures::default(),
+        fallbacks: None,
+        weight: FontWeight::NORMAL,
+        style: FontStyle::Normal,
+    };
+    let id = text_system.resolve_font(&font);
+    text_system.advance(id, px(16.0), 'あ').is_ok() // i18n-ok（あ のグリフの有無で日本語用フォントを判定する。i18n-ok）
+}
+
 /// Fonts bundled with the desktop app (`fonts/carlito/`, OFL-1.1): Carlito,
 /// with Calibri's widths, stands in for it. Not in the web build, whose
 /// download it would add 2.7 MB to.
@@ -601,6 +625,9 @@ fn add_extra_font_dirs(cx: &App, names: &mut HashSet<String>) {
 
 #[cfg(target_family = "wasm")]
 fn add_extra_font_dirs(_: &App, _: &mut HashSet<String>) {}
+
+/// The names of the system's fonts and the app's bundled one, listed once per run (it takes a while).
+static SYSTEM_FONTS: std::sync::OnceLock<HashSet<String>> = std::sync::OnceLock::new();
 
 /// Embedded fonts already given to the text system, by a hash of their
 /// data, with their family. The text system cannot drop fonts, so each is
@@ -652,10 +679,6 @@ impl Fonts {
     }
 
     fn new(cx: &App) -> Self {
-        // The system's fonts, listed once per run (it takes a while), with
-        // the fonts bundled with the app; fonts embedded in documents are
-        // added apart, by `add_embedded`.
-        static SYSTEM_FONTS: std::sync::OnceLock<HashSet<String>> = std::sync::OnceLock::new();
         // Another text system than the first one (each scenario of the tests has its own)
         // is given the bundled fonts too: the list above is kept, they are not.
         let first = SYSTEM_FONTS.get().is_none();

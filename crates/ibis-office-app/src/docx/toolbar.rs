@@ -357,6 +357,15 @@ pub(crate) fn toolbar_right(editor: &SlideEditor) -> Vec<ToolItem> {
                 .into()
         })
         .collect();
+    if let Some(installed) = crate::shell::font_menu::installed_fonts_entry(Some(&font), |this, family, _, cx| {
+        // A font with Japanese glyphs is set for both scripts, as for the fixed list above (by its name, or by its glyphs); another one for Latin text only.
+        let japanese = crate::render::shape_view::is_east_asian_typeface(family) || crate::render::shape_view::covers_japanese(cx, family);
+        let change = if japanese { ibis_doc_model::RunChange::AllFonts(family.to_string()) } else { ibis_doc_model::RunChange::Font(family.to_string()) };
+        this.apply_run_change(change, cx);
+    }) {
+        font_menu.push(MenuEntry::Separator);
+        font_menu.push(installed);
+    }
     font_menu.push(MenuItem::tr("docx.font.custom").on(|this, window, cx| this.open_font_edit(window, cx)).into());
     let cur_theme_color = current.as_ref().and_then(|(f, _)| f.theme_color.clone());
     let theme_items: Vec<MenuEntry> = THEME_COLORS.iter().map(|&(item_id, label, rgb_val, theme_name, tint, shade)| {
