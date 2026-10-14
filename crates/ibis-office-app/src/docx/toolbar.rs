@@ -351,7 +351,7 @@ pub(crate) fn toolbar_right(editor: &SlideEditor) -> Vec<ToolItem> {
                 .on(move |this, _, cx| {
                     // A Japanese font is set for both scripts, as Word does;
                     // a Latin one for Latin text only.
-                    let change = if f.is_ascii() { ibis_doc_model::RunChange::Font(f.to_string()) } else { ibis_doc_model::RunChange::AllFonts(f.to_string()) };
+                    let change = if crate::render::shape_view::is_east_asian_typeface(f) { ibis_doc_model::RunChange::AllFonts(f.to_string()) } else { ibis_doc_model::RunChange::Font(f.to_string()) };
                     this.apply_run_change(change, cx);
                 })
                 .into()

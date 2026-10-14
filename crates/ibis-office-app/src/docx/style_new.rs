@@ -174,7 +174,7 @@ impl SlideEditor {
         let [font, size, color] = &fields;
         if *font != initial.0[0] && !font.is_empty() {
             run.font = Some(font.clone());
-            run.east_asian_font = (!font.is_ascii()).then(|| font.clone()).or(run.east_asian_font);
+            run.east_asian_font = crate::render::shape_view::is_east_asian_typeface(font).then(|| font.clone()).or(run.east_asian_font);
         }
         if *size != initial.0[1]
             && let Ok(pt) = size.parse::<f32>()

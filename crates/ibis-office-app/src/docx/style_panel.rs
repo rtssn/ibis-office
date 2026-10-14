@@ -139,7 +139,7 @@ impl SlideEditor {
         let Some(mut style) = self.flow().and_then(|d| d.styles.styles.get(&id).cloned()) else { return };
         if font != initial.0[0] && !font.is_empty() {
             style.run.font = Some(font.clone());
-            if !font.is_ascii() {
+            if crate::render::shape_view::is_east_asian_typeface(&font) {
                 style.run.east_asian_font = Some(font);
             }
         }

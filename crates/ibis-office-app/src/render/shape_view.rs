@@ -469,7 +469,7 @@ const WEIGHT_SUFFIXES: &[(&str, FontWeight)] = &[
 const STAND_INS: &[&str] = &["YuGothic", "YuMincho"];
 
 /// Office's names of typefaces and the names other systems install them
-/// under (macOS calls 游ゴシック "YuGothic").
+/// under (macOS calls 游ゴシック "YuGothic") (and Linux's Noto CJK names).
 const TYPEFACE_ALIASES: &[(&str, &str)] = &[
     // Windows' 游ゴシック first: it is what Office draws with (Office for
     // Mac brings it), before macOS' own (heavier) one.
@@ -498,6 +498,12 @@ const TYPEFACE_ALIASES: &[(&str, &str)] = &[
     ("ＭＳ ゴシック", "MS Gothic"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
     ("ＭＳ Ｐ明朝", "MS PMincho"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
     ("ＭＳ 明朝", "MS Mincho"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
+    ("Noto Sans JP", "Noto Sans CJK JP"),
+    ("Noto Serif JP", "Noto Serif CJK JP"),
+    ("BIZ UDゴシック", "BIZ UDGothic"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
+    ("BIZ UDPゴシック", "BIZ UDPGothic"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
+    ("BIZ UD明朝", "BIZ UDMincho"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
+    ("BIZ UDP明朝", "BIZ UDPMincho"), // i18n-ok（フォント名の対応表（ファイルに保存されるフォント名）。font_label の対）
 ];
 
 /// For the web build: the typefaces the document asks for, under the names
@@ -539,9 +545,9 @@ fn browser_fallbacks(_: &TextStyle) -> Option<FontFallbacks> {
 }
 
 /// Typefaces made for Japanese (or other East Asian) text.
-fn is_east_asian_typeface(name: &str) -> bool {
+pub(crate) fn is_east_asian_typeface(name: &str) -> bool {
     const HINTS: &[&str] = &[
-        "M PLUS", "Noto Sans JP", "Noto Serif JP", "Noto Sans CJK", "Yu Gothic", "Yu Mincho",
+        "M PLUS", "Noto Sans JP", "Noto Serif JP", "Noto Sans CJK", "Noto Serif CJK", "Yu Gothic", "Yu Mincho",
         "Meiryo", "Hiragino", "MS Gothic", "MS Mincho", "MS PGothic", "BIZ UD", "Kosugi",
         "Sawarabi", "IPA", "Source Han",
     ];
@@ -688,7 +694,7 @@ impl Fonts {
                 log::warn!("bundled fonts could not be loaded: {err}");
             }
         }
-        let east_asian_fallback = ["Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans CJK JP"]
+        let east_asian_fallback = ["Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans CJK JP", "Noto Sans JP", "IPAexGothic", "IPAGothic", "Source Han Sans JP"]
             .into_iter()
             .find(|f| installed.contains(*f))
             .map(SharedString::from);
@@ -754,7 +760,7 @@ impl Fonts {
         let weight = WEIGHT_SUFFIXES.iter().find(|(suffix, _)| name.ends_with(suffix)).map(|(_, w)| *w).unwrap_or(FontWeight::NORMAL);
         // A Mincho (serif) typeface gives way to an installed Mincho.
         if (name.contains("明朝") || name.contains("Mincho")) // i18n-ok（フォント名の照合（部分一致で明朝を判定）。i18n-ok）
-            && let Some(mincho) = ["Hiragino Mincho ProN", "YuMincho", "BIZ UDMincho"].into_iter().find(|f| self.installed.contains(*f))
+            && let Some(mincho) = ["Hiragino Mincho ProN", "YuMincho", "BIZ UDMincho", "Noto Serif CJK JP", "Noto Serif JP", "IPAexMincho", "IPAMincho", "Source Han Serif JP"].into_iter().find(|f| self.installed.contains(*f))
         {
             return (mincho.into(), weight);
         }
@@ -3688,6 +3694,27 @@ impl Resources {
             .unwrap_or(0.0);
         PAIR_KERNING.with(|c| c.borrow_mut().insert((id, a, b), em));
         em * size
+    }
+}
+
+#[cfg(test)]
+mod font_substitution_tests {
+    use super::{Fonts, is_east_asian_typeface};
+
+    #[test]
+    fn japanese_typefaces_fall_back_to_installed_noto_cjk() {
+        let fonts = Fonts {
+            installed: ["Noto Sans CJK JP", "Noto Serif CJK JP"].iter().map(|s| s.to_string()).collect(),
+            east_asian_fallback: Some("Noto Sans CJK JP".into()),
+        };
+        assert_eq!(fonts.family("游明朝").0.to_string(), "Noto Serif CJK JP");
+        assert_eq!(fonts.family("ＭＳ 明朝").0.to_string(), "Noto Serif CJK JP");
+        assert_eq!(fonts.family("BIZ UDP明朝").0.to_string(), "Noto Serif CJK JP");
+        assert_eq!(fonts.family("Noto Serif JP").0.to_string(), "Noto Serif CJK JP");
+        assert_eq!(fonts.family("Noto Sans JP").0.to_string(), "Noto Sans CJK JP");
+        assert_eq!(fonts.family("游ゴシック").0.to_string(), "Noto Sans CJK JP");
+        assert!(is_east_asian_typeface("Noto Serif CJK JP") && is_east_asian_typeface("Noto Serif JP"));
+        assert!(!is_east_asian_typeface("Noto Serif") && !is_east_asian_typeface("Arial"));
     }
 }
 
